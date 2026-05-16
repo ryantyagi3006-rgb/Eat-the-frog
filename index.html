@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eat the Frog</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0e1208;
+    --surface: #161c0c;
+    --surface2: #1c2510;
+    --surface3: #222d13;
+    --green-bright: #7cfc00;
+    --green-mid: #4a9c1a;
+    --green-dim: #2d5c10;
+    --green-glow: rgba(124,252,0,0.08);
+    --amber: #f5a623;
+    --red: #e85d5d;
+    --blue: #5da8e8;
+    --purple: #a78bfa;
+    --muted: #4a5c35;
+    --text: #d4e8a8;
+    --text2: #8aaa60;
+    --text3: #526640;
+    --border: rgba(124,252,0,0.12);
+    --border2: rgba(124,252,0,0.06);
+    --A: #e85d5d;
+    --B: #f5a623;
+    --C: #5da8e8;
+    --D: #a78bfa;
+    --E: #526640;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(124,252,0,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 0 20px;
+    border-bottom: 1px solid var(--border2);
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--green-bright);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo span { color: var(--text3); font-weight: 400; font-size: 14px; letter-spacing: 0; }
+
+  .header-stats {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .stat {
+    text-align: right;
+  }
+
+  .stat-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--green-bright);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+
+  /* ── Frog ── */
+  .frog-zone {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    margin-bottom: 36px;
+  }
+
+  .frog-container {
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  #frog-svg {
+    cursor: pointer;
+    filter: drop-shadow(0 0 18px rgba(124,252,0,0.18));
+    transition: filter 0.3s;
+  }
+
+  #frog-svg:hover {
+    filter: drop-shadow(0 0 28px rgba(124,252,0,0.35));
+  }
+
+  .frog-speech {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 22px;
+    flex: 1;
+    position: relative;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .frog-speech::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 36px;
+    width: 10px; height: 10px;
+    background: var(--surface2);
+    clip-path: polygon(100% 0, 100% 100%, 0 50%);
+    border-left: 1px solid var(--border);
+  }
+
+  .speech-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--green-mid);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 8px;
+  }
+
+  .speech-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .speech-text strong {
+    color: var(--green-bright);
+    font-weight: 500;
+  }
+
+  /* ── Meters ── */
+  .meters {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .meter {
+    flex: 1;
+  }
+
+  .meter-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .meter-bar {
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .meter-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .meter-fill.hunger { background: var(--amber); }
+  .meter-fill.hydration { background: var(--blue); }
+  .meter-fill.mood { background: var(--green-bright); }
+
+  /* ── Add Task ── */
+  .add-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .add-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+
+  .add-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .input-group {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .input-group label {
+    display: block;
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus, textarea:focus {
+    border-color: rgba(124,252,0,0.3);
+  }
+
+  input[type="text"]::placeholder, textarea::placeholder {
+    color: var(--text3);
+  }
+
+  .type-select {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .type-btn {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text3);
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .type-btn:hover { border-color: rgba(124,252,0,0.3); }
+  .type-btn.active[data-type="A"] { background: rgba(232,93,93,0.15); border-color: var(--A); color: var(--A); }
+  .type-btn.active[data-type="B"] { background: rgba(245,166,35,0.15); border-color: var(--B); color: var(--B); }
+  .type-btn.active[data-type="C"] { background: rgba(93,168,232,0.15); border-color: var(--C); color: var(--C); }
+  .type-btn.active[data-type="D"] { background: rgba(167,139,250,0.15); border-color: var(--D); color: var(--D); }
+  .type-btn.active[data-type="E"] { background: rgba(82,102,64,0.25); border-color: var(--E); color: var(--text2); }
+
+  .add-btn {
+    height: 42px;
+    padding: 0 20px;
+    background: var(--green-bright);
+    border: none;
+    border-radius: 10px;
+    color: var(--bg);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .add-btn:hover {
+    background: #93ff20;
+    transform: translateY(-1px);
+  }
+
+  .add-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .type-hint {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 10px;
+    font-family: 'DM Mono', monospace;
+    min-height: 18px;
+    transition: color 0.2s;
+  }
+
+  /* ── Task List ── */
+  .tasks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .tasks-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 6px;
+  }
+
+  .filter-tab {
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text3);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-tab:hover, .filter-tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: rgba(124,252,0,0.2);
+  }
+
+  /* ── Task Group ── */
+  .task-group {
+    margin-bottom: 20px;
+  }
+
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .group-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .group-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .group-count {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text3);
+    background: var(--surface2);
+    padding: 2px 7px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+  }
+
+  .group-toggle {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text3);
+    transition: transform 0.2s;
+  }
+
+  .group-toggle.collapsed { transform: rotate(-90deg); }
+
+  /* ── Task Card ── */
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+
+  .task-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.2s ease-out;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .task-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+
+  .task-card[data-type="A"]::before { background: var(--A); }
+  .task-card[data-type="B"]::before { background: var(--B); }
+  .task-card[data-type="C"]::before { background: var(--C); }
+  .task-card[data-type="D"]::before { background: var(--D); }
+  .task-card[data-type="E"]::before { background: var(--E); }
+
+  .task-card:hover {
+    border-color: var(--border);
+    background: var(--surface2);
+  }
+
+  .task-card.done {
+    opacity: 0.45;
+  }
+
+  .task-card.done .task-title {
+    text-decoration: line-through;
+    color: var(--text3);
+  }
+
+  .task-check {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid var(--muted);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .task-check:hover {
+    border-color: var(--green-mid);
+    background: rgba(124,252,0,0.06);
+  }
+
+  .task-check:checked {
+    background: var(--green-mid);
+    border-color: var(--green-mid);
+  }
+
+  .task-check:checked::after {
+    content: '';
+    display: block;
+    width: 10px; height: 7px;
+    border-left: 2px solid var(--bg);
+    border-bottom: 2px solid var(--bg);
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+
+  .task-body { flex: 1; min-width: 0; }
+
+  .task-title {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.4;
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+
+  .task-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .task-badge {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .task-time {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .task-delete {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    font-size: 16px;
+    line-height: 1;
+    opacity: 0;
+  }
+
+  .task-card:hover .task-delete { opacity: 1; }
+  .task-delete:hover { color: var(--red); background: rgba(232,93,93,0.1); }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+    font-size: 14px;
+  }
+
+  .empty-state svg { margin-bottom: 12px; opacity: 0.3; }
+
+  /* ── Focus Mode ── */
+  .focus-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--green-bright);
+    color: var(--bg);
+    border: none;
+    border-radius: 14px;
+    padding: 14px 22px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 24px rgba(124,252,0,0.3);
+    transition: all 0.2s;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .focus-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 36px rgba(124,252,0,0.45);
+  }
+
+  /* ── Focus Overlay ── */
+  .focus-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 200;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .focus-overlay.active { display: flex; }
+
+  .focus-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px;
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+  }
+
+  .focus-badge {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--A);
+    margin-bottom: 16px;
+  }
+
+  .focus-task {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 32px;
+  }
+
+  .focus-frog {
+    margin: 0 auto 28px;
+    display: block;
+  }
+
+  .focus-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .focus-complete {
+    background: var(--green-bright);
+    color: var(--bg);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .focus-complete:hover { background: #93ff20; transform: translateY(-1px); }
+
+  .focus-skip {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .focus-skip:hover { background: var(--surface3); }
+
+  .focus-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 20px;
+    padding: 8px;
+    line-height: 1;
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+
+  .focus-close:hover { color: var(--text); background: var(--surface2); }
+
+  .no-frogs {
+    color: var(--text3);
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  /* ── Celebration ── */
+  .celebrate {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 300;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: confetti 1s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes confetti {
+    0% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) rotate(var(--r)); opacity: 0; }
+  }
+
+  /* ── Progress ring ── */
+  .progress-ring {
+    transform: rotate(-90deg);
+  }
+
+  .ring-bg { fill: none; stroke: var(--surface3); stroke-width: 3; }
+  .ring-fill { fill: none; stroke: var(--green-bright); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 0.6s; }
+
+  /* Frog animations */
+  @keyframes frogBlink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.05); }
+  }
+
+  @keyframes frogBob {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-4px); }
+  }
+
+  #frog-body { animation: frogBob 3.5s ease-in-out infinite; }
+  #frog-leye { transform-origin: 95px 47px; animation: frogBlink 4.5s ease-in-out infinite; }
+  #frog-reye { transform-origin: 115px 47px; animation: frogBlink 4.5s ease-in-out infinite; }
+
+  @keyframes tongueOut {
+    0%, 100% { opacity: 0; transform: scaleX(0); }
+    50% { opacity: 1; transform: scaleX(1); }
+  }
+
+  #frog-tongue { transform-origin: 105px 75px; opacity: 0; }
+  #frog-tongue.eating { animation: tongueOut 0.4s ease-in-out 3; }
+
+  .group-A .group-dot { background: var(--A); }
+  .group-A .group-label { color: var(--A); }
+  .group-B .group-dot { background: var(--B); }
+  .group-B .group-label { color: var(--B); }
+  .group-C .group-dot { background: var(--C); }
+  .group-C .group-label { color: var(--C); }
+  .group-D .group-dot { background: var(--D); }
+  .group-D .group-label { color: var(--D); }
+  .group-E .group-dot { background: var(--E); }
+  .group-E .group-label { color: var(--text2); }
+
+  .task-badge[data-type="A"] { background: rgba(232,93,93,0.15); color: var(--A); }
+  .task-badge[data-type="B"] { background: rgba(245,166,35,0.15); color: var(--B); }
+  .task-badge[data-type="C"] { background: rgba(93,168,232,0.15); color: var(--C); }
+  .task-badge[data-type="D"] { background: rgba(167,139,250,0.15); color: var(--D); }
+  .task-badge[data-type="E"] { background: rgba(82,102,64,0.25); color: var(--text2); }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="logo">
+      🐸 Eat the Frog
+      <span>— get it done.</span>
+    </div>
+    <div class="header-stats">
+      <div class="stat">
+        <div class="stat-num" id="done-count">0</div>
+        <div class="stat-label">Done today</div>
+      </div>
+      <div style="position:relative;width:44px;height:44px;flex-shrink:0;">
+        <svg width="44" height="44" class="progress-ring">
+          <circle class="ring-bg" cx="22" cy="22" r="18"/>
+          <circle class="ring-fill" id="progress-ring" cx="22" cy="22" r="18"
+            stroke-dasharray="113" stroke-dashoffset="113"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--green-bright);font-weight:500;" id="progress-pct">0%</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Frog zone -->
+  <div class="frog-zone">
+    <div class="frog-container">
+      <svg id="frog-svg" width="130" height="130" viewBox="0 0 210 210" xmlns="http://www.w3.org/2000/svg" onclick="frogSpeak()">
+        <g id="frog-body">
+          <!-- Shadow -->
+          <ellipse cx="105" cy="190" rx="55" ry="10" fill="rgba(0,0,0,0.35)"/>
+          <!-- Back legs -->
+          <ellipse cx="60" cy="155" rx="28" ry="14" fill="#2a5c15" transform="rotate(-15 60 155)"/>
+          <ellipse cx="150" cy="155" rx="28" ry="14" fill="#2a5c15" transform="rotate(15 150 155)"/>
+          <!-- Feet back -->
+          <ellipse cx="38" cy="162" rx="18" ry="8" fill="#1e4510" transform="rotate(-20 38 162)"/>
+          <ellipse cx="172" cy="162" rx="18" ry="8" fill="#1e4510" transform="rotate(20 172 162)"/>
+          <!-- Body -->
+          <ellipse cx="105" cy="130" rx="58" ry="52" fill="#3a7c1a"/>
+          <!-- Body highlight -->
+          <ellipse cx="95" cy="112" rx="28" ry="18" fill="#4a9c22" opacity="0.6"/>
+          <!-- Belly -->
+          <ellipse cx="105" cy="138" rx="34" ry="28" fill="#c8e87c" opacity="0.55"/>
+          <!-- Front legs -->
+          <ellipse cx="55" cy="148" rx="16" ry="10" fill="#3a7c1a" transform="rotate(20 55 148)"/>
+          <ellipse cx="155" cy="148" rx="16" ry="10" fill="#3a7c1a" transform="rotate(-20 155 148)"/>
+          <!-- Front feet -->
+          <ellipse cx="44" cy="158" rx="12" ry="6" fill="#2a5c15" transform="rotate(25 44 158)"/>
+          <ellipse cx="166" cy="158" rx="12" ry="6" fill="#2a5c15" transform="rotate(-25 166 158)"/>
+          <!-- Head -->
+          <ellipse cx="105" cy="88" rx="50" ry="40" fill="#3a7c1a"/>
+          <ellipse cx="95" cy="78" rx="24" ry="14" fill="#4a9c22" opacity="0.5"/>
+          <!-- Eye sockets left -->
+          <circle cx="83" cy="62" r="18" fill="#2a5c15"/>
+          <circle cx="83" cy="62" r="13" fill="#1a3c0a"/>
+          <!-- Eye sockets right -->
+          <circle cx="127" cy="62" r="18" fill="#2a5c15"/>
+          <circle cx="127" cy="62" r="13" fill="#1a3c0a"/>
+          <!-- Eyes left -->
+          <g id="frog-leye">
+            <circle cx="83" cy="62" r="11" fill="#f0f0e0"/>
+            <circle cx="85" cy="63" r="7" fill="#1a1a0a"/>
+            <circle cx="87" cy="61" r="3" fill="#7cfc00" opacity="0.8"/>
+            <circle cx="83" cy="59" r="1.5" fill="white" opacity="0.9"/>
+          </g>
+          <!-- Eyes right -->
+          <g id="frog-reye">
+            <circle cx="127" cy="62" r="11" fill="#f0f0e0"/>
+            <circle cx="129" cy="63" r="7" fill="#1a1a0a"/>
+            <circle cx="131" cy="61" r="3" fill="#7cfc00" opacity="0.8"/>
+            <circle cx="127" cy="59" r="1.5" fill="white" opacity="0.9"/>
+          </g>
+          <!-- Nostrils -->
+          <circle cx="99" cy="82" r="3" fill="#1e4510"/>
+          <circle cx="111" cy="82" r="3" fill="#1e4510"/>
+          <!-- Mouth -->
+          <path d="M 78 95 Q 105 108 132 95" stroke="#1e4510" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- Tongue -->
+          <ellipse id="frog-tongue" cx="105" cy="105" rx="22" ry="8" fill="#e85d9a" opacity="0.9"/>
+        </g>
+      </svg>
+      <!-- Meters below frog -->
+      <div class="meters" style="width:130px;margin-top:10px;">
+        <div class="meter">
+          <div class="meter-label"><span>🍃</span><span id="hunger-val">80</span></div>
+          <div class="meter-bar"><div class="meter-fill hunger" id="hunger-bar" style="width:80%"></div></div>
+        </div>
+        <div class="meter">
+          <div class="meter-label"><span>💧</span><span id="hydration-val">70</span></div>
+          <div class="meter-bar"><div class="meter-fill hydration" id="hydration-bar" style="width:70%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="frog-speech">
+        <div class="speech-label">🐸 Ribbit Report</div>
+        <div class="speech-text" id="frog-message">
+          Click me to get a briefing on your tasks. Add something important and <strong>I'll tell you what needs eating first.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add task -->
+  <div class="add-section">
+    <h2>Add a Task</h2>
+    <div class="add-row">
+      <div class="input-group">
+        <label>Task</label>
+        <input type="text" id="task-input" placeholder="What needs doing?" autocomplete="off"/>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;font-family:'DM Mono',monospace;margin-bottom:6px;">Priority</div>
+        <div class="type-select">
+          <button class="type-btn active" data-type="A">A</button>
+          <button class="type-btn" data-type="B">B</button>
+          <button class="type-btn" data-type="C">C</button>
+          <button class="type-btn" data-type="D">D</button>
+          <button class="type-btn" data-type="E">E</button>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addTask()">Add Task</button>
+    </div>
+    <div class="type-hint" id="type-hint">A — Must do: serious consequences if skipped. Eat this frog first.</div>
+  </div>
+
+  <!-- Task list -->
+  <div class="tasks-header">
+    <h2>Your Frogs</h2>
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all" onclick="setFilter(this,'all')">All</button>
+      <button class="filter-tab" data-filter="pending" onclick="setFilter(this,'pending')">Pending</button>
+      <button class="filter-tab" data-filter="done" onclick="setFilter(this,'done')">Done</button>
+    </div>
+  </div>
+
+  <div id="task-container"></div>
+</div>
+
+<!-- Focus button -->
+<button class="focus-btn" onclick="openFocus()">
+  🐸 Focus Mode
+</button>
+
+<!-- Focus overlay -->
+<div class="focus-overlay" id="focus-overlay">
+  <div class="focus-card" id="focus-card">
+    <button class="focus-close" onclick="closeFocus()">✕</button>
+    <div id="focus-content"></div>
+  </div>
+</div>
+
+<!-- Celebration canvas -->
+<div class="celebrate" id="celebrate"></div>
+
+<script>
+const TYPES = {
+  A: { label: 'A – Must Do', hint: 'A — Must do: serious consequences if skipped. Eat this frog first.', color: '#e85d5d', desc: 'Critical frog' },
+  B: { label: 'B – Should Do', hint: 'B — Should do: mild consequences if skipped.', color: '#f5a623', desc: 'Important task' },
+  C: { label: 'C – Nice To Do', hint: 'C — Nice to do: no real consequences if skipped.', color: '#5da8e8', desc: 'Low priority' },
+  D: { label: 'D – Delegate', hint: 'D — Delegate: someone else can handle this.', color: '#a78bfa', desc: 'Hand it off' },
+  E: { label: 'E – Eliminate', hint: 'E — Eliminate: cut it. Not worth your time.', color: '#526640', desc: 'Cut it' }
+};
+
+const FROG_MESSAGES = {
+  no_tasks: [
+    "The lily pad is bare. Add some tasks — let's see what frogs you need to eat today.",
+    "Nothing to croak about... yet. Add your tasks and I'll tell you what to eat first.",
+    "An empty pond. Drop your to-dos in and I'll sort the frogs from the flies."
+  ],
+  has_A: (count, task) => [
+    `Ribbit! You have <strong>${count} critical frog${count>1?'s':''}</strong> waiting. Your biggest, ugliest frog right now: <strong>"${task}"</strong> — eat it first, everything else waits.`,
+    `Don't even look at your B and C tasks. That <strong>"${task}"</strong> is the frog staring you down. Swallow it first.`,
+    `<strong>${count} A-priority frog${count>1?'s':''}</strong> on the plate. Start with <strong>"${task}"</strong> — the rest of the day gets easier after this one.`
+  ],
+  only_BC: (task) => [
+    `No critical tasks — good. Your top frog today is <strong>"${task}"</strong>. Get it done before the should-do's creep up.`,
+    `The pond is manageable. Lead with <strong>"${task}"</strong> while you're fresh, then work down the list.`
+  ],
+  all_done: [
+    "All frogs eaten. 🎉 The pond is clear. Seriously — take a breath. You did the work.",
+    "Clean slate. Every frog devoured. That's what focus looks like.",
+    "Nothing left to croak about. You crushed it. Log off and rest, the pond will refill tomorrow."
+  ],
+  no_A_but_D: [
+    "A few things here could be handed off. Check your D tasks — delegation isn't laziness, it's leverage.",
+    "Don't do everything yourself. Those D tasks? Pass them along and focus on what only you can do."
+  ]
+};
+
+let tasks = JSON.parse(localStorage.getItem('etf_tasks') || '[]');
+let selectedType = 'A';
+let currentFilter = 'all';
+let hunger = 80;
+let hydration = 70;
+let focusIndex = 0;
+
+function save() {
+  localStorage.setItem('etf_tasks', JSON.stringify(tasks));
+}
+
+function selectType(type) {
+  selectedType = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+  document.getElementById('type-hint').textContent = TYPES[type].hint;
+}
+
+document.querySelectorAll('.type-btn').forEach(b => b.onclick = () => selectType(b.dataset.type));
+
+document.getElementById('task-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+});
+
+function addTask() {
+  const input = document.getElementById('task-input');
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+  tasks.push({
+    id: Date.now(),
+    text,
+    type: selectedType,
+    done: false,
+    created: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+  });
+  save();
+  input.value = '';
+  input.focus();
+  hunger = Math.min(100, hunger + 8);
+  hydration = Math.min(100, hydration + 5);
+  updateMeters();
+  render();
+  animateFrogEat();
+  setTimeout(frogSpeak, 600);
+}
+
+function toggleDone(id) {
+  const t = tasks.find(t => t.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  save();
+  if (t.done && t.type === 'A') {
+    celebrate();
+    hunger = Math.max(0, hunger - 20);
+    hydration = Math.max(0, hydration - 15);
+  }
+  updateMeters();
+  render();
+  updateStats();
+  setTimeout(frogSpeak, 400);
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  save();
+  render();
+  updateStats();
+}
+
+function setFilter(el, f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.toggle('active', b === el));
+  render();
+}
+
+function visibleTasks() {
+  if (currentFilter === 'pending') return tasks.filter(t => !t.done);
+  if (currentFilter === 'done') return tasks.filter(t => t.done);
+  return tasks;
+}
+
+function render() {
+  const container = document.getElementById('task-container');
+  const vt = visibleTasks();
+
+  if (vt.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div>No tasks here yet.</div></div>`;
+    updateStats();
+    return;
+  }
+
+  const groups = { A:[], B:[], C:[], D:[], E:[] };
+  vt.forEach(t => groups[t.type].push(t));
+
+  let html = '';
+  Object.entries(groups).forEach(([type, list]) => {
+    if (!list.length) return;
+    html += `
+    <div class="task-group group-${type}">
+      <div class="group-header" onclick="toggleGroup('${type}')">
+        <div class="group-dot"></div>
+        <div class="group-label">${TYPES[type].label}</div>
+        <div class="group-count">${list.length}</div>
+        <div class="group-toggle" id="toggle-${type}">▾</div>
+      </div>
+      <div class="task-list" id="list-${type}">
+        ${list.map(t => taskHTML(t)).join('')}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+  updateStats();
+}
+
+function taskHTML(t) {
+  return `
+  <div class="task-card${t.done?' done':''}" data-type="${t.type}" id="card-${t.id}">
+    <input type="checkbox" class="task-check"${t.done?' checked':''} onchange="toggleDone(${t.id})"/>
+    <div class="task-body">
+      <div class="task-title">${escHtml(t.text)}</div>
+      <div class="task-meta">
+        <span class="task-badge" data-type="${t.type}">${t.type}</span>
+        <span class="task-time">${t.created}</span>
+      </div>
+    </div>
+    <button class="task-delete" onclick="deleteTask(${t.id})" title="Delete">✕</button>
+  </div>`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toggleGroup(type) {
+  const list = document.getElementById('list-' + type);
+  const toggle = document.getElementById('toggle-' + type);
+  if (!list) return;
+  list.style.display = list.style.display === 'none' ? '' : 'none';
+  toggle.classList.toggle('collapsed', list.style.display === 'none');
+}
+
+function updateStats() {
+  const done = tasks.filter(t => t.done).length;
+  const total = tasks.length;
+  document.getElementById('done-count').textContent = done;
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  const circ = 2 * Math.PI * 18;
+  const offset = circ - (pct / 100) * circ;
+  document.getElementById('progress-ring').style.strokeDashoffset = offset;
+}
+
+function updateMeters() {
+  document.getElementById('hunger-bar').style.width = hunger + '%';
+  document.getElementById('hunger-val').textContent = Math.round(hunger);
+  document.getElementById('hydration-bar').style.width = hydration + '%';
+  document.getElementById('hydration-val').textContent = Math.round(hydration);
+}
+
+function frogSpeak() {
+  const msg = document.getElementById('frog-message');
+  const pending = tasks.filter(t => !t.done);
+  const pendingA = pending.filter(t => t.type === 'A');
+  const pendingB = pending.filter(t => t.type === 'B');
+  const pendingD = pending.filter(t => t.type === 'D');
+
+  let messages;
+  if (tasks.length === 0) {
+    messages = FROG_MESSAGES.no_tasks;
+  } else if (tasks.every(t => t.done)) {
+    messages = FROG_MESSAGES.all_done;
+  } else if (pendingA.length > 0) {
+    messages = FROG_MESSAGES.has_A(pendingA.length, pendingA[0].text);
+  } else if (pending.length > 0) {
+    const top = pendingB[0] || pending[0];
+    if (pendingD.length > 0 && !pendingB.length) {
+      messages = FROG_MESSAGES.no_A_but_D;
+    } else {
+      messages = FROG_MESSAGES.only_BC(top.text);
+    }
+  } else {
+    messages = FROG_MESSAGES.all_done;
+  }
+
+  const text = messages[Math.floor(Math.random() * messages.length)];
+  msg.style.opacity = '0';
+  msg.style.transform = 'translateY(4px)';
+  msg.style.transition = 'opacity 0.2s, transform 0.2s';
+  setTimeout(() => {
+    msg.innerHTML = text;
+    msg.style.opacity = '1';
+    msg.style.transform = 'translateY(0)';
+  }, 200);
+}
+
+function animateFrogEat() {
+  const tongue = document.getElementById('frog-tongue');
+  tongue.classList.remove('eating');
+  void tongue.offsetWidth;
+  tongue.classList.add('eating');
+  setTimeout(() => tongue.classList.remove('eating'), 1300);
+}
+
+function celebrate() {
+  const el = document.getElementById('celebrate');
+  el.innerHTML = '';
+  const colors = ['#7cfc00','#f5a623','#e85d5d','#5da8e8','#a78bfa','#c8e87c'];
+  for (let i = 0; i < 32; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight * 0.5 + 100;
+    const tx = (Math.random()-0.5) * 200 + 'px';
+    const ty = (Math.random() * 200 + 100) + 'px';
+    p.style.cssText = `left:${x}px;top:${y}px;background:${colors[i%colors.length]};--tx:${tx};--ty:${ty};--r:${Math.random()*720}deg;animation-delay:${Math.random()*0.3}s`;
+    el.appendChild(p);
+  }
+  setTimeout(() => el.innerHTML = '', 1500);
+}
+
+// Focus mode
+function openFocus() {
+  const frogs = tasks.filter(t => !t.done).sort((a,b) => 'ABCDE'.indexOf(a.type) - 'ABCDE'.indexOf(b.type));
+  const content = document.getElementById('focus-content');
+
+  if (frogs.length === 0) {
+    content.innerHTML = `
+      <div style="font-size:64px;margin-bottom:16px;">🎉</div>
+      <div class="no-frogs">All frogs eaten! Nothing left to do.</div>
+      <button class="focus-skip" onclick="closeFocus()">Close</button>`;
+  } else {
+    const task = frogs[focusIndex % frogs.length];
+    content.innerHTML = `
+      <svg class="focus-frog" width="80" height="80" viewBox="0 0 210 210">
+        <ellipse cx="105" cy="130" rx="58" ry="52" fill="#3a7c1a"/>
+        <ellipse cx="105" cy="138" rx="34" ry="28" fill="#c8e87c" opacity="0.55"/>
+        <ellipse cx="105" cy="88" rx="50" ry="40" fill="#3a7c1a"/>
+        <circle cx="83" cy="62" r="18" fill="#2a5c15"/><circle cx="83" cy="62" r="11" fill="#f0f0e0"/><circle cx="86" cy="64" r="7" fill="#1a1a0a"/><circle cx="88" cy="61" r="3" fill="#7cfc00" opacity="0.8"/>
+        <circle cx="127" cy="62" r="18" fill="#2a5c15"/><circle cx="127" cy="62" r="11" fill="#f0f0e0"/><circle cx="130" cy="64" r="7" fill="#1a1a0a"/><circle cx="132" cy="61" r="3" fill="#7cfc00" opacity="0.8"/>
+        <path d="M 78 95 Q 105 108 132 95" stroke="#1e4510" stroke-width="2.5" fill="none"/>
+      </svg>
+      <div class="focus-badge" style="color:${TYPES[task.type].color}">
+        ${TYPES[task.type].label} — ${TYPES[task.type].desc}
+      </div>
+      <div class="focus-task">${escHtml(task.text)}</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:28px;font-family:'DM Mono',monospace;">
+        ${frogs.length} task${frogs.length>1?'s':''} remaining — you got this
+      </div>
+      <div class="focus-actions">
+        <button class="focus-complete" onclick="completeFocus(${task.id})">✓ Done, eat the frog</button>
+        ${frogs.length > 1 ? `<button class="focus-skip" onclick="nextFocus()">Next →</button>` : ''}
+      </div>`;
+  }
+  document.getElementById('focus-overlay').classList.add('active');
+}
+
+function completeFocus(id) {
+  const t = tasks.find(t => t.id === id);
+  if (t) { t.done = true; save(); }
+  celebrate();
+  save();
+  render();
+  updateStats();
+  setTimeout(frogSpeak, 500);
+  closeFocus();
+  if (t?.type === 'A') {
+    hunger = Math.max(0, hunger - 20);
+    hydration = Math.max(0, hydration - 15);
+    updateMeters();
+  }
+}
+
+function nextFocus() {
+  focusIndex++;
+  openFocus();
+}
+
+function closeFocus() {
+  document.getElementById('focus-overlay').classList.remove('active');
+}
+
+// Drain meters slowly
+setInterval(() => {
+  const pendingA = tasks.filter(t => !t.done && t.type === 'A').length;
+  if (pendingA > 0) {
+    hunger = Math.max(10, hunger - 0.3);
+    hydration = Math.max(10, hydration - 0.2);
+  }
+  updateMeters();
+}, 3000);
+
+// Init
+render();
+frogSpeak();
+</script>
+</body>
+</html>
